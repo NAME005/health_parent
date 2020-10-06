@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 绑定接口全限定类名 -->
+<mapper namespace="cn.itjohnny.dao.PermissionDao">
+
+    <!--表字段-->
+    <sql id="permissionVol">
+        id,name,keyword,description
+    </sql>
+
+    <!--根据userid查询role-->
+    <select id="findByRoleId" resultType="cn.itjohnny.pojo.Permission">
+    SELECT
+        p.*
+    FROM
+        t_permission p,
+        t_role_permission rp
+    WHERE
+        p.`id`=rp.`permission_id` AND
+        rp.`role_id`=#{roleId};
+    </select>
+
+
+    <!--新增 与课件不同,这里没写参数类型属性-->
+    <insert id="add">
+        insert into
+        t_permission(name,keyword,description)
+                      values
+        (#{name},#{keyword},#{description})
+    </insert>
+
+    <!--查询所有-->
+    <select id="findByQueryString" resultType="cn.itjohnny.pojo.Permission">
+        select
+        <include refid="permissionVol"/>
+        from
+        t_permission
+        <if test="value != null and value.length > 0">
+            where keyword = #{queryString} or name = #{queryString}
+        </if>
+    </select>
+
+    <!--根据id查找该权限项被几个角色关联-->
+    <select id="findRelatedCountOfRole" resultType="long">
+        select
+          count(1)
+        from
+          t_role_permission
+        where
+          permission_id = #{id}
+    </select>
+
+    <!--根据id删除-->
+    <delete id="deleteById">
+        delete from
+          t_permission
+        where
+          id = #{id}
+    </delete>
+
+    <!--根据id查找权限项-->
+    <select id="findById" resultType="cn.itjohnny.pojo.Permission">
+        select
+        <include refid="permissionVol"/>
+        from
+        t_permission
+        where
+        id = #{id}
+    </select>
+
+    <!--编辑权限项-->
+    <update id="editPermission">
+        update
+          t_permission
+        set
+          name = #{name},
+          keyword = #{keyword},
+          description = #{description}
+        where id = #{id}
+    </update>
+
+
+    <!--根据角色id查找权限项id-->
+    <select id="findPermissionIdByRoleId" resultType="int">
+        select
+            permission_id
+        from
+            t_role_permission
+        where
+            role_id=#{id}
+    </select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</mapper>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 绑定接口全限定类名 -->
+<mapper namespace="cn.itjohnny.dao.SetMealDao">
+
+    <resultMap id="extend" type="cn.itjohnny.pojo.Setmeal">
+        <id column="id" property="id"/>
+        <collection property="checkGroups"
+                    column="id"
+                    ofType="cn.itjohnny.pojo.CheckGroup"
+                    select="cn.itjohnny.dao.CheckGroupDao.findBySetmealId"
+        />
+    </resultMap>
+
+    <!--表字段-->
+    <sql id="setMealVol">
+        id,code,name,sex,age,helpCode,price,remark,attention,img
+    </sql>
+
+    <!--新增-->
+    <insert id="add">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into t_setmeal(code,name,sex,age,helpCode,price,remark,attention,img)
+        values
+        (#{code},#{name},#{sex},#{age},#{helpCode},#{price},#{remark},#{attention},#{img})
+    </insert>
+
+    <!--往检查组检查套餐中间表添加数据-->
+    <insert id="add2SetMealAndCheckGroup">
+        insert into
+          t_setmeal_checkgroup
+        values
+          (${setmealId},${checkGroupId})
+    </insert>
+
+    <!--查询所有-->
+    <select id="findByQueryString" resultType="cn.itjohnny.pojo.Setmeal">
+        select
+        <include refid="setMealVol"/>
+        from
+        t_setmeal
+        <if test="value != null and value.length > 0">
+            where code = #{queryString} or
+            name = #{queryString}       or
+            helpCode = #{queryString}
+        </if>
+    </select>
+    
+    <!--根据id查询,包括所有绑定的类关系-->
+    <select id="findById" resultMap="extend">
+        select
+          <include refid="setMealVol"/>
+        from
+          t_setmeal
+        where
+          id=#{id}
+    </select>
+
+    <!--查询每个套餐预约数量-->
+    <select id="getSetmealCounts" resultType="map">
+    SELECT
+        s.`name` 'name',
+        COUNT(o.`setmeal_id`) 'value'
+    FROM
+        t_order o,
+        t_setmeal s
+    WHERE
+        o.`setmeal_id`=s.`id`
+    GROUP BY
+        o.`setmeal_id`;
+    </select>
+
+
+
+
+   
+</mapper>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 绑定接口全限定类名 -->
+<mapper namespace="cn.itjohnny.dao.RoleDao">
+
+    <!--根据userid查询role-->
+    <select id="findUserId" resultType="cn.itjohnny.pojo.Role">
+    SELECT
+        r.*
+    FROM
+        t_role r,
+        t_user_role ur
+    WHERE
+        r.`id`=ur.`user_id` AND
+        ur.`user_id`=#{userId};
+    </select>
+
+
+    <!--表字段-->
+    <sql id="roleVol">
+        id,name,keyword,description
+    </sql>
+
+    <!--新增-->
+    <insert id="add">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into t_role(name,keyword,description)
+        values
+        (#{name},#{keyword},#{description})
+    </insert>
+
+    <!--往权限项角色中间表添加数据-->
+    <insert id="addToRoleAndPermission">
+        insert into
+          t_role_permission
+        values
+          (#{roleId},#{permissionId})
+    </insert>
+
+    <!--查询所有-->
+    <select id="findByQueryString" resultType="cn.itjohnny.pojo.Role">
+        select
+        <include refid="roleVol"/>
+        from
+        t_role
+        <if test="value != null and value.length > 0">
+            where name = #{queryString} or
+            keyword = #{queryString}
+        </if>
+    </select>
+
+    <!--根据id查找角色-->
+    <select id="findRoleById" resultType="cn.itjohnny.pojo.Role">
+        select
+        <include refid="roleVol"/>
+        from
+        t_role
+        where
+        id=#{id}
+    </select>
+
+    <!--更新角色数据-->
+    <update id="update">
+        update
+          t_role
+        set
+          name=#{name},
+          keyword=#{keyword},
+          description=#{description}
+        where
+          id=#{id}
+    </update>
+
+    <!--在角色权限中间表中根据角色id删除数据-->
+    <delete id="deleteRoleAndItem">
+        delete from
+          t_role_permission
+        where
+          role_id=#{roleId};
+    </delete>
+
+    <!--根据角色id删除角色表中的角色-->
+    <delete id="deleteById">
+        delete from
+          t_role
+        where
+          id=#{id}
+    </delete>
+
+    <!--根据检查套餐id查询-->
+    <select id="findByUserId" resultType="cn.itjohnny.pojo.Role">
+    SELECT
+	    *
+    FROM
+        t_role
+    WHERE
+        id IN (SELECT role_id FROM t_setmeal_role WHERE setmeal_id = #{id});
+    </select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</mapper>

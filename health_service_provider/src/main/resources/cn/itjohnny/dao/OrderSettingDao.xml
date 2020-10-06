@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 绑定接口全限定类名 -->
+<mapper namespace="cn.itjohnny.dao.OrderSettingDao">
+
+    <!--表字段-->
+    <sql id="orderSettingVol">
+        id,orderDate,number,reservations
+    </sql>
+
+    <!--新增-->
+    <insert id="add">
+        insert into
+          t_ordersetting(orderDate,number,reservations)
+        values
+          (#{orderDate},#{number},#{reservations})
+    </insert>
+
+    <!--查询日期是否已经存在-->
+    <select id="countByOrderDate" resultType="long">
+        select count(id) from t_ordersetting where orderDate=#{orderDate};
+    </select>
+
+    <!--根据日期更新 这里跟课件不一样,这里加了if-->
+    <update id="updateByOrderDate">
+        update
+          t_ordersetting
+        set
+          number=#{number}
+          <if test="reservations != 0">
+              ,reservations=#{reservations}
+          </if>
+        where
+          orderDate=#{orderDate}
+    </update>
+
+    <!--根据月份查询-->
+    <select id="findOrderSettingsByMonth" resultType="cn.itjohnny.pojo.OrderSetting">
+        select
+          <include refid="orderSettingVol"/>
+        from
+          t_ordersetting
+        where
+          orderDate between #{start} and #{end};
+    </select>
+
+    <!--查找某个日期是否约满-->
+    <select id="findFullOrderSettingByDate" resultType="cn.itjohnny.pojo.OrderSetting">
+        SELECT
+            <include refid="orderSettingVol"/>
+        FROM
+            t_ordersetting
+        WHERE
+            number = reservations AND
+            orderDate = #{orderDate};
+    </select>
+
+    <!--根据日期查询-->
+    <select id="findByDate" resultType="cn.itjohnny.pojo.OrderSetting">
+        select
+          <include refid="orderSettingVol"/>
+        from
+          t_ordersetting
+        where
+          orderDate=#{orderDate}
+    </select>
+
+
+
+
+
+</mapper>
